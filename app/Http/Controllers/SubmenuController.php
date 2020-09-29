@@ -109,7 +109,7 @@ class SubmenuController extends Controller
             $targetMenu->save();
             $submenu->save();
         }
-        return redirect()->route('menus.edit', $parentId);
+        return redirect()->back();
     }
 
     public function orderDown(int $parentId, int $id)
@@ -123,7 +123,7 @@ class SubmenuController extends Controller
             $targetMenu->save();
             $submenu->save();
         }
-        return redirect()->route('menus.edit', $parentId);
+        return redirect()->back();
     }
 
     public function toggle(Request $request)
