@@ -56,6 +56,38 @@
                 </button>
             </td>
         </tr>
+
+        @if($menu->submenus->isNotEmpty())
+            @foreach ($menu->submenus as $_key => $submenu)
+            <tr>
+                <td>{{ ($key+1).'.'.($_key+1) }}</td>
+                <td style="white-space: pre">      <i class="{{ $submenu->icon }}"></i> {{ $submenu->text }}</td>
+                <td>{{ $submenu->url }}</td>
+                <td>{{ $submenu->target }}</td>
+                <td></td>
+                <td>
+                    <div class="form-group">
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" class="custom-control-input switch-status" id="switchSub{{$submenu->id}}" {{ $submenu->status ? 'checked' : ''}} data-id="{{ $submenu->id }}" data-parentid="{{ $menu->id }}">
+                            <label class="custom-control-label" for="switchSub{{$submenu->id}}"></label>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="{{ route('menus.submenus.order.up', [$menu->id, $submenu->id]) }}"><i class="fas fa-angle-up"></i></a>
+                    <a class="btn btn-sm btn-primary" href="{{ route('menus.submenus.order.down', [$menu->id, $submenu->id]) }}"><i class="fas fa-angle-down"></i></a>
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="{{ route('menus.submenus.edit', [$menu->id, $submenu->id]) }}">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button class="btn btn-sm btn-danger delete-btn" data-parentId="{{ $menu->id }}" data-id="{{ $submenu->id }}" data-name="{{ $submenu->text }}" data-parentid="{{ $menu->id }}" >
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            @endforeach
+        @endif
         @endforeach
     </tbody>
 </table>
@@ -69,9 +101,16 @@
     Array.from(document.querySelectorAll('.delete-btn')).forEach(element => {
         element.onclick = e => {
             console.log(element.dataset)
-            const {id, name} = element.dataset;
+            const {id, name, parentid} = element.dataset;
+
+            let uri = `/menus/${id}`
+
+            if (parentid) {
+                uri = `/menus/${parentid}/submenus/${id}`
+            }
+
             if (confirm(`Delete menu ${name}?`)) {
-                fetch(`/menus/${id}`, {
+                fetch(uri, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -83,32 +122,29 @@
       }
   })
 
-    const confirmDelete = id => {
-        if (confirm(`Delete menu ${id}?`)) {
-          fetch(`/menus/${id}`, {
-            method: 'DELETE',
-            headers: {
-              'X-CSRF-TOKEN': '{{ csrf_token() }}'
-          }
-      }).then(res => {
-        window.location.reload()
-    })
-  }
-}
+    Array.from(document.querySelectorAll('.switch-status')).forEach(element => {
+        element.onchange = event => {
+            const {id, parentid} = element.dataset;
+            const status = element.checked
 
-Array.from(document.querySelectorAll('.switch-status')).forEach(element => {
-    element.onchange = event => {
-        const id = parseInt(element.dataset.id)
-        const status = element.checked
-        fetch(`{{route('menus.toggle')}}`, {
-            method: 'PUT',
-            body: JSON.stringify({id, status}),
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'content-type': 'application/json'
+            let url = "{{ route('menus.toggle') }}"
+
+            if (parentid) {
+                url = `/menus/${parentid}/submenus/toggle`
             }
-        })
-    }
-})
+
+            console.log(url)
+
+            fetch(url, {
+                method: 'PUT',
+                body: JSON.stringify({id, status}),
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'content-type': 'application/json'
+                }
+            })
+        }
+    })
+
 </script>
 @endsection

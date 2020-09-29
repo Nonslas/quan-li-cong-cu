@@ -11,31 +11,51 @@
 	<div class="card-body">
 		<form id="addForm" method="POST" action="{{ route('menus.store') }}">
 			@csrf
-			<div class="form-group">
-				{{ Form::label('text') }}
-				{{ Form::text('text', '', ['class' => 'form-control']) }}
-			</div>
 
-			<div class="form-group">
-				{{ Form::label('url') }}
-				{{ Form::text('url', '', ['class' => 'form-control']) }}
-			</div>
+			<div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        {{ Form::label('text') }}
+                        {{ Form::text('text', '', ['class' => 'form-control']) }}
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        {{ Form::label('icon') }}
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i id="iconPreview"></i></span>
+                            </div>
+                            {{ Form::text('icon', 'far fa-circle', ['class' => 'form-control']) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-			<div class="form-group">
-				{{ Form::label('target') }}
-				{{ Form::text('target', '_self', ['class' => 'form-control']) }}
-			</div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        {{ Form::label('url') }}
+                        {{ Form::text('url', '', ['class' => 'form-control']) }}
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        {{ Form::label('target') }}
+                        {{ Form::text('target', '', ['class' => 'form-control']) }}
+                    </div>
+                </div>
+            </div>
 
-			<div class="form-group">
-				<label>Icon</label>
-				<div class="input-group">
-					<div class="input-group-prepend">
-						<span class="input-group-text"><i id="iconPreview"></i></span>
-					</div>
-					<input type="text" class="form-control" name="icon" id="iconInput" value="far fa-circle">
-				</div>
+            <div class="form-group">
+				<label>Parent menu</label>
+				<select name="parent_id" class="form-control" style="width: 100%">
+					<option></option>
+					@foreach ($menus as $menu)
+					<option value="{{ $menu->id }}">{{ $menu->text }}</option>
+					@endforeach
+				</select>
 			</div>
-
 
 			<div class="form-group">
 				<label>Permissions</label>
@@ -59,11 +79,13 @@
     	$(".select2").select2();
         $("#addForm").validate({
             rules: {
-                name: "required"
+                text: "required",
+                url: "required",
             },
             messages: {
-                name: "Please enter supplier name"
-            },
+                text: "Please enter submenu text",
+                url: "Please enter url",
+	        },
             errorElement: 'span',
             errorPlacement: function (error, element) {
                 error.addClass('invalid-feedback');
@@ -77,10 +99,10 @@
             }
         })
 
-        const previewIcon = () => iconPreview.className = iconInput.value
+        const previewIcon = () => iconPreview.className = icon.value
         previewIcon()
-        iconInput.onkeyup = previewIcon
-        iconInput.onchange = previewIcon
+        icon.onkeyup = previewIcon
+        icon.onchange = previewIcon
     })
 </script>
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Submenu;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
@@ -27,6 +28,7 @@ class MenuController extends Controller
     public function create()
     {
         return view('menus.create', [
+            'menus' => Menu::all(),
             'permissions' => Permission::all()
         ]);
     }
@@ -39,7 +41,18 @@ class MenuController extends Controller
      */
     public function store(Request $request)
     {
-        // ddd($request->all());
+        if ($request->parent_id) {
+            $parentId = (int) $request->parent_id;
+            $menu = Menu::with('submenus')->findOrFail($parentId);
+            $order = ($menu->submenus->max('order') ?? -1) + 1  ;
+            $submenu = new Submenu;
+            $submenu->fill($request->all());
+            $submenu->order = $order;
+            $submenu->status = true;
+            $menu->submenus()->save($submenu);
+            return redirect()->route('menus.index');
+        }
+
         $lastOrderMenu = Menu::select('order')->orderBy('order', 'DESC')->first();
         $order = is_null($lastOrderMenu) ? 0 : $lastOrderMenu->order + 1;
         // dd($order);
