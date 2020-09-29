@@ -16,7 +16,10 @@ class MenuController extends Controller
      */
     public function index()
     {
-        $menus = Menu::with('permissions')->orderBy('order')->get();
+        $menus = Menu::with([
+            'permissions',
+            'submenus' => fn ($query) => $query->orderBy('order')
+        ])->orderBy('order')->get();
         return view('menus.index', ['menus' => $menus]);
     }
 
